@@ -6,13 +6,31 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Load deployment configuration
-if [ -f "deploy.env" ]; then
-    export $(cat deploy.env | grep -v '#' | xargs)
-else
-    echo -e "${RED}Error: deploy.env file not found!${NC}"
-    exit 1
+# Check for config files and create them if they don't exist
+if [ ! -f "config_deploy.env" ]; then
+    echo -e "${YELLOW}config_deploy.env not found. Creating from template...${NC}"
+    if [ -f "config_deploy.env-template" ]; then
+        cp config_deploy.env-template config_deploy.env
+        echo -e "${YELLOW}Please edit config_deploy.env with your settings before continuing.${NC}"
+        exit 1
+    else
+        echo -e "${RED}Error: config_deploy.env-template not found!${NC}"
+        exit 1
+    fi
 fi
+
+if [ ! -f "config_app.env" ]; then
+    echo -e "${YELLOW}config_app.env not found. Creating from template...${NC}"
+    if [ -f "config_app.env-template" ]; then
+        cp config_app.env-template config_app.env
+    else
+        echo -e "${RED}Error: config_app.env-template not found!${NC}"
+        exit 1
+    fi
+fi
+
+# Load deployment configuration
+export $(cat config_deploy.env | grep -v '#' | xargs)
 
 # Default Target Raspberry Pi details
 PI_USER="pi"
